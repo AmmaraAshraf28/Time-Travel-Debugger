@@ -12,10 +12,10 @@
 #include <string>
 #include <cstdint>
 #include <fstream>
-#include <unistd.h>
-#include <sys/socket.h>
 #include <cstdint>
 #include <cstdio>
+#include <stdexcept>
+
 using namespace std;
 
 // ---- Constants ----
@@ -45,37 +45,108 @@ class Stack
 public:
     // Implement these functions:
     Stack()
-    { // initialize the stack
+    { 
+
+        top = nullptr;
+        count = 0;
+
     }
+
     void push(const T &val)
     {
-
         // pushes the value on the stack if max limit is not reached yet.
+        if (count < MAX_STACK_DEPTH) {
+
+            Node* newNode = new Node();
+
+            newNode->data = val;
+            newNode->next = top;
+
+            top = newNode;
+            count++;
+
+        }
     }
+
+
+
     T pop()
     {
         // pop the top value on the stack
+
+        if (isEmpty()) 
+        {
+            throw runtime_error("Stack is empty");
+        }
+        
+        Node* temp = top;
+
+        T popped_Val = temp->data;
+        top = top->next;
+
+        delete temp;
+
+        count--;
+
+        return popped_Val;
     }
+
     T &peek()
     {
         // returns the top value on the stack
+
+        if (isEmpty()) 
+        {
+
+            throw runtime_error("Stack is  empty");
+        }
+
+        return top->data;
     }
+
+
     bool isEmpty()
     {
+
+        return count == 0;
     }
+
+
     int32_t depth()
     {
+
+        return count;
     }
+
+
     int32_t snapshot_into(T out[], int32_t maxLen)
     {
         // copies every frame, top to bottom in the array given as a parameter
         // this is what buildSnapshot() call, returns count written
+        
+        int32_t written = 0;
+
+        Node* current   = top;
+
+        while (current != nullptr && written < maxLen) {
+
+            out[written] = current->data;
+
+            current = current->next;
+
+            written++;
+
+        }
+        
+        return written;
     }
+
 };
 
 
 // Timeline : doubly linked list of Snapshots
 struct Snapshot; // fwd declaration;
+
 struct TimelineNode
 {
     Snapshot *data;
