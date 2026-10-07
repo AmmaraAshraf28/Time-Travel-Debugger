@@ -153,27 +153,62 @@ struct TimelineNode
     TimelineNode *next;
     TimelineNode *prev;
 };
+
 class Timeline
 {
     TimelineNode *head, *tail;
+    
     int32_t stepCount;
 
 public:
     // Implement these functions
     Timeline()
     {
+
+        head = nullptr;
+        tail = nullptr;
+        stepCount = 0;
+
     }
+    
     void record(Snapshot *s)
     {
         // add record in the timeline
+        TimelineNode* newNode = new TimelineNode();
+
+        newNode->data = s;
+
+        newNode->next = nullptr;
+        newNode->prev = tail;
+
+        if (tail != nullptr)
+         {
+            tail->next = newNode;
+        } 
+        else
+         {
+            head = newNode; // If list is empty , new node is also head
+        }
+        
+        tail = newNode;
+        stepCount++;
     }
+    
+
+
     TimelineNode *begin()
     {
+        return head;
     }
+    
+
     int32_t getStepCount()
     {
+
+        return stepCount;
     }
 };
+
 
 // Core structs
 struct Variable
@@ -190,6 +225,9 @@ struct Frame
     Variable locals[MAX_VARS_PER_FRAME];
     int32_t localCount;
 };
+
+
+
 struct Snapshot
 {
     Frame callStack[MAX_STACK_DEPTH];
