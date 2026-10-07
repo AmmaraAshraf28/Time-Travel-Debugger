@@ -9,4 +9,6 @@ OCT 4, 2026
 Made my github repo and submitted it. Start designing basic skeleton of my project.
 OCT 5,2026
 My linux system was not working well, so i reinstalled and was dealing with configuration issues
-
+OCT 7,2026
+After succesful installation of git on my system and correctly associating it with my VS code, i committed code on the github.
+Implemented initial structure of the project and submitted it. Learnt some new things about the linux which i didnt know earlier.
