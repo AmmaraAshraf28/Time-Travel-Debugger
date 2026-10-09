@@ -242,10 +242,15 @@ struct TTDBHeader
 };
 void writeHeader(FILE *f, const TTDBHeader &h)
 {
+
     fwrite(h.magic, 1, 4, f);
+
     fwrite(&h.version, sizeof(int32_t), 1, f);
 
-    // placeholder for other two data members
+    fwrite(&h.stepCount, sizeof(int32_t), 1, f);
+    
+
+    fwrite(&h.indexOffset, sizeof(int64_t), 1, f);
 }
 
 // resolve.bin - bookkeeping
@@ -265,20 +270,149 @@ struct PendingPatch
 // PASS 0x0: READING source.bin + VALIDITY CHECK
 bool readSourceLine(ifstream &in, string &out)
 {
-    // reads the next nonblank line
+
+    while (getline(in, out))
+     {
+        bool isBlank = true;
+
+
+        for (int i = 0; i < out.length(); i++)
+         {
+            if (out[i] != ' ' && out[i] != '\t' && out[i] != '\r') 
+            {
+                isBlank = false;
+                break; 
+            }
+        }
+
+        
+        if (isBlank == false)
+         {
+            return true; 
+        }
+    }
+
+    return false; 
 }
+
+
+
 string firstWord(const string &line)
 {
-    // returns first word from the input string
+
+    string word = "";
+
+    int i = 0;
+    
+    while (i < line.length() && line[i] == ' ')
+     {
+        i++;
+    }
+    
+    while (i < line.length() && line[i] != ' ')
+     {
+
+        word = word + line[i];
+        i++;
+    }
+    
+    return word;
 }
+
+
 string secondWord(const string &line)
 {
-    // returns the second word
+    string word = "";
+
+    int i = 0;
+    
+    while (i < line.length() && line[i] == ' ')
+     {
+        i++;
+    }
+
+
+    while (i < line.length() && line[i] != ' ')
+     {
+        i++;
+    }
+
+
+    while (i < line.length() && line[i] == ' ') 
+    
+    {
+        i++;
+    }
+    
+
+    while (i < line.length() && line[i] != ' ')
+     {
+        word = word + line[i];
+        i++;
+    }
+    
+    return word;
+
 }
+
+
+
 bool validateProgram(const char *sourcePath)
 {
-    // for each func defined there should be exactly one func_end and no nested funcs allowed - 
+    ifstream file(sourcePath);
+
+    if (!file.is_open())
+     {
+        
+        return false; 
+    }
+    
+    string line;
+    
+    bool insideFunction = false; 
+    
+    while (readSourceLine(file, line))
+     {
+        
+        string keyword = firstWord(line);
+        
+        if (keyword == "FUNC")
+         {
+            if (insideFunction == true) 
+            {
+                file.close();
+                return false; 
+            }
+
+            insideFunction = true; 
+
+        } 
+        else if (keyword == "FUNC_END")
+         {
+            if (insideFunction == false) 
+            {
+                file.close();
+                return false; 
+            }
+
+            insideFunction = false; 
+
+        }
+    }
+    
+    file.close();
+    
+    if (insideFunction == true)
+     {
+        return false;
+    }
+    
+
+    return true; 
+    
 }
+
+
 
 // PASS 0x1: RESOLVE() -> resolve.bin
 int64_t writeResolveRecord(FILE *f, int64_t offsetField, const string &text)
